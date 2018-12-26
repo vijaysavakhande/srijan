@@ -23,6 +23,7 @@ class ComposerStaticInit8b64afe1287a16c50a68024f61d3e4cc
     public static $classMap = array (
         'HGSI\\Library\\Password' => __DIR__ . '/../..' . '/app/HGSI/Library/Password.php',
         'HGSI\\Repository\\EncryptInterface' => __DIR__ . '/../..' . '/app/HGSI/Repository/EncryptInterface.php',
+        'HGSI\\Repository\\Mcrypt' => __DIR__ . '/../..' . '/app/HGSI/Repository/Mcrypt.php',
         'HGSI\\Repository\\OpenSSL' => __DIR__ . '/../..' . '/app/HGSI/Repository/OpenSSL.php',
         'HGSI\\Repository\\PasswordFactory' => __DIR__ . '/../..' . '/app/HGSI/Repository/PasswordFactory.php',
     );
