@@ -1,0 +1,59 @@
+<?php
+
+/**
+ * @file
+ * Controls the visual building blocks a page is constructed with.
+ */
+
+use Drupal\block\Entity\Block;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeInterface;
+use Drupal\Core\Access\AccessResult;
+
+/**
+ * Implement hook_theme()
+ */
+function configure_block_theme($existing, $type, $theme, $path){
+    $render_array=['variables'=>[
+        'attributes'=>['class' => ['config-block'],'id' => 'config-block'],
+        'title'=>NULL,'image'=>NULL,'description'=>NULL],
+        'template'=>'block--configure-block'];
+    return ['configure_block_setup'=>$render_array];
+}
+/**
+ * [Implements  hook_block_access]
+ * @param  Block            $block     [description]
+ * @param  [type]           $operation [description]
+ * @param  AccountInterface $account   [description]
+ * @return [type]                      [description]
+ */
+function configure_block_block_access(Block $block, $operation, AccountInterface $account) {
+
+  // $node = \Drupal::routeMatch()->getParameter('node');
+
+  // $hero_image_exists = FALSE;
+
+  // if ($node instanceof NodeInterface) {
+  //   if ($node->hasField('field_hero_image')) {
+  //     if (!$node->get('field_hero_image')->isEmpty()) {
+  //       $hero_image_exists = TRUE;
+  //     }
+  //   }
+  // }
+
+  // if ($operation == 'view' && $block->getPluginId() == 'custom_block') {
+  //   return AccessResult::forbiddenIf($hero_image_exists == FALSE)->addCacheableDependency($block);
+  // }
+
+  // return AccessResult::neutral();
+}
+/**
+ * Implements hook_preprocess_HOOK() for block--configure-block.html.twig
+ * @param  [type] &$vars [description]
+ * @return [type]        [description]
+ */
+function configure_block_preprocess_block(&$vars){  
+  if($vars['plugin_id']=='custom_block'){
+    // $vars['#cache']['max-age'] = 0;
+  }
+}
