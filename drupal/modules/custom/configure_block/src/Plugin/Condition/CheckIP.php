@@ -43,7 +43,9 @@ class CheckIP extends ConditionPluginBase {
         );
     }
     /**
-    * {@inheritdoc}
+     * Provide IP Address textarea to enter ip address for IP based condition
+     * for block 
+     * {@inheritdoc}
     */
     public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
         $form = parent::buildConfigurationForm($form, $form_state);
@@ -60,6 +62,7 @@ class CheckIP extends ConditionPluginBase {
         return $form;
     }
     /**
+     * Validate is user entered correct IP address
     * {@inheritdoc}
     */
     public function validateConfigurationForm(array &$form, FormStateInterface $form_state){
@@ -73,6 +76,7 @@ class CheckIP extends ConditionPluginBase {
         }
     }
     /**
+     * Submit user provided information to DB
     * {@inheritdoc}
     */
     public function submitConfigurationForm(array &$form, FormStateInterface $form_state){
@@ -81,6 +85,10 @@ class CheckIP extends ConditionPluginBase {
         
     }
     /**
+     * Visibility check based on IP address added to block plugin
+     * If user X-Forwarded IP  address is matched with Block IP address
+     * then set visibility FALSE for the block
+     * else Return TRUE
     * {@inheritdoc}
     */
     public function evaluate(){
