@@ -30,7 +30,7 @@ function configure_block_theme($existing, $type, $theme, $path){
 function configure_block_block_access(Block $block, $operation, AccountInterface $account) {
 
   // $node = \Drupal::routeMatch()->getParameter('node');
-
+  // print_r($node);
   // $hero_image_exists = FALSE;
 
   // if ($node instanceof NodeInterface) {
@@ -41,11 +41,11 @@ function configure_block_block_access(Block $block, $operation, AccountInterface
   //   }
   // }
 
-  // if ($operation == 'view' && $block->getPluginId() == 'custom_block') {
-  //   return AccessResult::forbiddenIf($hero_image_exists == FALSE)->addCacheableDependency($block);
+  // if ($operation == 'view' && $block->getPluginId() == 'custom_block') {    
+  //   // return AccessResult::forbiddenIf($hero_image_exists == FALSE)->addCacheableDependency($block);
   // }
 
-  // return AccessResult::neutral();
+  return AccessResult::neutral();
 }
 /**
  * Implements hook_preprocess_HOOK() for block--configure-block.html.twig

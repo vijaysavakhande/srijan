@@ -2,9 +2,11 @@
 namespace Drupal\configure_block\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Block\BlockPluginInterface;
+use Drupal\Core\Cache\Context\CacheContextInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
+use Drupal\Core\Cache\Cache;
 /**
  * Provides a 'CustomBlock' block.
  *
@@ -15,12 +17,21 @@ use Drupal\file\Entity\File;
  * )
  */
 class DefaultBlock extends BlockBase implements BlockPluginInterface {
+
+    public function __construct(array $configuration, $plugin_id, $plugin_definition) {
+        parent::__construct($configuration, $plugin_id, $plugin_definition);
+        $this->setConfiguration($configuration);
+    }
     /**
      * {@inheritdoc}
      */
     public function blockForm($form, FormStateInterface $formState){
         $form = parent::blockForm($form, $formState);
         $config = $this->getConfiguration();
+
+        // Disallow negation of this condition.
+        unset($form['negate']);
+
         $form['title'] = array(
             '#type' => 'textfield',
             '#title' => t('Block Title'),
@@ -73,12 +84,14 @@ class DefaultBlock extends BlockBase implements BlockPluginInterface {
      * {@inheritdoc}
      */
     public function build(){
+        // Do NOT cache a page with this block on it.
         $build = [];
+        // \Drupal::service('page_cache_kill_switch')->trigger();
         $image = $this->configuration['image'];
         if (!empty($image[0])) {
           if ($file = File::load($image[0])) {
             $build['#image'] = [
-              '#theme' => 'image',
+              '#theme' => 'image_style',
               '#style_name' => 'medium',
               '#uri' => $file->getFileUri(),
             ];
@@ -86,9 +99,17 @@ class DefaultBlock extends BlockBase implements BlockPluginInterface {
         }
         $build['#attached']['library'][] = 'configure_block/configure_block';
         $build['#cache']['max-age'] = 0;
+        $build['#cache']['contexts'] = ['ip'];
+        $userip =  \Drupal::request()->getClientIp();        
         $build['#theme'] = 'configure_block_setup';
         $build['#title'] = $this->configuration['title'];
         $build['#description']= $this->configuration['description']['value'];
         return $build;
     }
+    /**
+    * {@inheritdoc}
+    */
+    public function getCacheContexts(){
+        return Cache::mergeContexts(parent::getCacheContexts(), ['ip:check_ip']);
+    }  
 }

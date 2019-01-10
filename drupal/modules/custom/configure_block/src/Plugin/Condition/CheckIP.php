@@ -2,9 +2,11 @@
 
 namespace Drupal\configure_block\Plugin\Condition;
 
+use Drupal;
 use Drupal\Core\Condition\ConditionPluginBase;
 use Drupal\Core\Form\FormStateInterface;
-use Symfony\Component\HttpFoundation;
+use Drupal\Core\Cache\Cache;
+
 /**
  * Provides a 'IP based visibility' condition.
  *
@@ -14,7 +16,19 @@ use Symfony\Component\HttpFoundation;
  * )
  */
 class CheckIP extends ConditionPluginBase {
-
+    /**
+    * Creates a new Block IP instance.
+    *
+    * @param array $configuration
+    *   The plugin configuration, i.e. an array with configuration values keyed
+    *   by configuration option name. The special key 'context' may be used to
+    *   initialize the defined contexts by setting it to an array of context
+    *   values keyed by context names.
+    * @param string $plugin_id
+    *   The plugin_id for the plugin instance.
+    * @param mixed $plugin_definition
+    *   The plugin implementation definition.
+    */
     public function __construct(array $configuration, $plugin_id, $plugin_definition) {
         parent::__construct($configuration, $plugin_id, $plugin_definition);
     }
@@ -33,6 +47,9 @@ class CheckIP extends ConditionPluginBase {
     */
     public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
         $form = parent::buildConfigurationForm($form, $form_state);
+        // Disallow negation of this condition.
+        unset($form['negate']);
+
         $config = $this->getConfiguration();
         $form['ban_ip'] = array(
             '#type' => 'textarea',
@@ -59,10 +76,9 @@ class CheckIP extends ConditionPluginBase {
     * {@inheritdoc}
     */
     public function submitConfigurationForm(array &$form, FormStateInterface $form_state){
-        if(!empty($form_state->getValue('ban_ip'))){
-            $this->configuration['ban_ip'] = $form_state->getValue('ban_ip');
-            parent::submitConfigurationForm($form, $form_state);            
-        }
+        $this->configuration['ban_ip'] = $form_state->getValue('ban_ip');
+        parent::submitConfigurationForm($form, $form_state);            
+        
     }
     /**
     * {@inheritdoc}
@@ -72,19 +88,9 @@ class CheckIP extends ConditionPluginBase {
         if (empty($this->configuration['ban_ip'])) {
           return TRUE;
         }
-        $userip =  \Drupal::request()->getClientIp();
-        if(!empty($this->configuration['ban_ip'])){
-            $ip_address = explode(',',$this->configuration['ban_ip']);
-            if (!empty($ip_address)){
-                foreach ($ip_address as $ip){
-                    if ($ip == $userip){
-                        return FALSE;
-                        break;
-                    }
-                }
-            }
-        }
-        return TRUE;
+        $userip =  \Drupal::request()->getClientIp();                
+        $ip_address = array_filter(array_map('trim',explode(',',$this->configuration['ban_ip'])));
+        return !in_array($userip,$ip_address); 
     }
     /**
     * {@inheritdoc}
@@ -96,30 +102,17 @@ class CheckIP extends ConditionPluginBase {
         }
         return $this->t('This blog will not be render for IP address @ip',['@ip'=>$ip_address]);
     }
-
+    
     /**
-    * Determines whether condition result will be negated.
-    *
-    * @return bool
-    *   Whether the condition result will be negated.
+    * {@inheritdoc}
     */
-    public function isNegated(){
-        // Check if a setting has been set.
-        if (empty($this->configuration['ban_ip'])) {
-          return FALSE;
-        }
-        $userip =  \Drupal::request()->getClientIp();
-        if(!empty($this->configuration['ban_ip'])){
-            $ip_address = explode(',',$this->configuration['ban_ip']);
-            if (!empty($ip_address)){
-                foreach ($ip_address as $ip){
-                    if ($ip == $userip){
-                        return TRUE;
-                        break;
-                    }
-                }
-            }
-        }
-        return FALSE;
+    public function getCacheContexts() {
+        return Cache::mergeContexts(parent::getCacheContexts(), ['ip:check_ip']);
+    }
+    /**
+    * {@inheritdoc}
+    */
+    public function defaultConfiguration() {
+        return ['ban_ip' =>''] ;
     }
 }
